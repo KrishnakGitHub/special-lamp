@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Google Sheet Video Gallery</title>
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <section class="videoslist">
+    <main class="mainContainer">
+      <div class="button-group" id="filter">
+        <!-- <button class="button active" data-filter="*">All</button> -->
+      </div>
+
+      <div class="gallery" id="gallery"></div>
+    </main>
+  </section>
+
+<!--   *****   JQuery Link   *****   -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+
+<!--   *****   Isotope Filter Link   *****  -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js"></script>
+
+<script type="text/javascript">
+
+let FULL_URL = 'https://script.google.com/macros/s/AKfycbx2-iXXJQAOpj2I90QXnH8Md2fBa-eBqhUP-kGFdvNXh5c-dE_L6anV_NZ88CP2AFMAhQ/exec';
+
+function getURL(theme){
+  fetchData(''+FULL_URL+"?theme="+theme+'');
+}
+
+function fetchData(FULL_URL){
+  gallery.innerHTML ='';
+  fetch(FULL_URL)
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return response.json();
+  })
+  .then(Data => {
+    if (!Array.isArray(Data.data)) {
+      throw new Error('Fetched data is not an array');
+    }
+    if (filter.innerHTML===''){
+    Data.themes.forEach(obj => {
+      const themeWithoutSpaces1 = obj.replace(/\s+/g, '');
+      filter.innerHTML += `
+      <button class="button" data-filter=".${themeWithoutSpaces1}" onclick="getURL('${obj}')">${obj}</button>
+      `;
+    });
+  }
+    Data.data.forEach(obj => {
+        var themeWithoutSpaces2 = obj.theme.replace(/\s+/g, '');
+        gallery.innerHTML += `
+        <div class="item ${themeWithoutSpaces2}">
+          <iframe width="560" height="315" src="${obj.youtube_link}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+          <div class="overlay">
+            <p>${obj.email_id}</p>
+          </div>
+        </div>`;
+      });
+      $('.button-group .button').on('click', function(){
+        $('.button-group .button').removeClass('active');
+        $(this).addClass('active');
+      });
+  })
+  
+  .catch(error => {
+    console.error('There was a problem with the fetch operation:', error);
+  });
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+  filter.innerHTML ='';
+  var theme = '';
+  getURL(theme);
+});
+
+</script>
+</body>
+</html>
